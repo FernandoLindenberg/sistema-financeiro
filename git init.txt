@@ -1,0 +1,6 @@
+git init
+git add .
+git commit -m "Upload inicial"
+git branch -M main
+git remote add origin https://github.com/FernandoLindenberg/sistema-financeiro.git
+git push -u origin main

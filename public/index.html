@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Planilha Financeira com Gráfico</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; margin: 40px; background: #f4f4f4; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, button { padding: 10px; margin: 5px 0; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; border-bottom: 1px solid #ddd; }
+    th { background-color: #007BFF; color: white; }
+    .saldo { font-size: 1.2em; margin-top: 10px; }
+    .receita { color: green; }
+    .despesa { color: red; }
+    canvas { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Planilha Financeira com Gráfico</h1>
+
+    <label for="tipo">Tipo:</label>
+    <select id="tipo">
+      <option value="receita">Receita</option>
+      <option value="despesa">Despesa</option>
+    </select>
+
+    <label for="descricao">Descrição:</label>
+    <input type="text" id="descricao">
+
+    <label for="valor">Valor (R$):</label>
+    <input type="number" id="valor" step="0.01">
+
+    <button onclick="adicionarTransacao()">Adicionar</button>
+
+    <div class="saldo" id="saldo">Saldo Total: R$ 0,00</div>
+
+    <table id="tabela">
+      <thead>
+        <tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <canvas id="grafico" height="100"></canvas>
+  </div>
+
+  <script>
+    let transacoes = [];
+
+    const ctx = document.getElementById('grafico').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Receitas', 'Despesas'],
+        datasets: [{
+          label: 'Total (R$)',
+          data: [0, 0],
+          backgroundColor: ['#28a745', '#dc3545']
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    function carregarTransacoes() {
+      fetch('/api/transacoes')
+        .then(res => res.json())
+        .then(data => {
+          transacoes = data;
+          atualizarTabela();
+        });
+    }
+
+    function adicionarTransacao() {
+      const tipo = document.getElementById('tipo').value;
+      const descricao = document.getElementById('descricao').value.trim();
+      const valor = parseFloat(document.getElementById('valor').value);
+      if (!descricao || isNaN(valor) || valor <= 0) return alert('Preencha todos os campos.');
+
+      fetch('/api/transacoes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo, descricao, valor })
+      }).then(carregarTransacoes);
+
+      document.getElementById('descricao').value = '';
+      document.getElementById('valor').value = '';
+    }
+
+    function removerTransacao(index) {
+      const id = transacoes[index].id;
+      fetch('/api/transacoes/' + id, { method: 'DELETE' }).then(carregarTransacoes);
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector('#tabela tbody');
+      tbody.innerHTML = '';
+      transacoes.forEach((t, i) => {
+        tbody.innerHTML += \`
+          <tr>
+            <td class="\${t.tipo}">\${t.tipo}</td>
+            <td>\${t.descricao}</td>
+            <td>R$ \${t.valor.toFixed(2).replace('.', ',')}</td>
+            <td><button onclick="removerTransacao(\${i})">Remover</button></td>
+          </tr>
+        \`;
+      });
+      atualizarSaldo();
+      atualizarGrafico();
+    }
+
+    function atualizarSaldo() {
+      const saldo = transacoes.reduce((acc, t) => t.tipo === 'receita' ? acc + t.valor : acc - t.valor, 0);
+      const saldoEl = document.getElementById('saldo');
+      saldoEl.textContent = 'Saldo Total: R$ ' + saldo.toFixed(2).replace('.', ',');
+      saldoEl.style.color = saldo >= 0 ? 'green' : 'red';
+    }
+
+    function atualizarGrafico() {
+      const receitas = transacoes.filter(t => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
+      const despesas = transacoes.filter(t => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
+      chart.data.datasets[0].data = [receitas, despesas];
+      chart.update();
+    }
+
+    window.onload = carregarTransacoes;
+  </script>
+</body>
+</html>
