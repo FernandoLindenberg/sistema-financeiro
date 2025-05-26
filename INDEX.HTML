@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINANCEIRO CONTA DUPLA</title>
+ 
+  <!-- Bibliotecas para PDF e Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script src="chart.umd.min.js"></script>
+  <style>
+    h3 {
+      font-size: 1.3rem;
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+
+  </style>
+
+    <style>
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  display: none;
+
+}
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(to right, #f9fbfd, #eef3f8);
+  color: #222;
+}
+
+/* Cabeçalho */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #40a9ff, #69c0ff);
+  padding: 10px 20px;
+  border-radius: 16px;
+  color: white;
+}
+header img {
+  height: 80px;
+}
+header button {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+header button:hover {
+  background: #d9363e;
+}
+
+/* Abas */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+}
+.tabs button.active {
+  background: linear-gradient(to top, #e6f7ff, #ffffff);
+  border: 2px solid #40a9ff;
+  border-bottom: none;
+  color: #40a9ff; /* Azul mais claro */
+  font-weight: bold;
+  box-shadow: 0px -2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+}
+
+.tabs button {
+  color: #333;
+}
+
+.tabs button:hover {
+  background-color: #f0f8ff;
+}
+
+/* Seções */
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+/* Cards Empresa */
+.companySection {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+.companySection h3 {
+  margin-bottom: 10px;
+  font-size: 1.4rem;
+  color: #007bff;
+}
+
+/* Tabelas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+th {
+  background: #007bff;
+  color: white;
+}
+th, td {
+  border: 1px solid #e8e8e8;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+tr:hover {
+  background-color: #f1f7ff;
+}
+.totals {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Formulários */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+form label {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+form input,
+form select {
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+button {
+  background: #40a9ff; /* Azul mais claro */
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #1890ff; /* Hover levemente mais escuro */
+}
+}
+
+/* Login */
+#login {
+  background: linear-gradient(to right, #007bff, #00c6ff);
+  color: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 380px;
+  margin: auto;
+  margin-top: 10vh;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Marca d'água */
+.marca-dagua {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.05;
+  pointer-events: none;
+}
+.marca-dagua img {
+  width: 600px;
+  max-width: 90%;
+}
+
+/* Botões Gerais */
+button {
+  transition: all 0.3s ease;
+}
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  .tabs {
+    flex-direction: column;
+  }
+  form label {
+    flex: 1 1 100%;
+  }
+}
+</style>
+
+<style>
+/* 🔥 Estilo do filtro do Dashboard */
+
+#filterSection label {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+#filterSection select,
+#filterSection input {
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+</style>
+
+<style>
+    h3 {
+      font-size: 1.3rem;
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+  </style>
+
+</head>
+<body>
+ <div id="login">
+  <img src="logo_conta_dupla.png" alt="Conta Dupla" style="width:200px; margin-bottom: 10px; display:block; margin-left:auto; margin-right:auto;">
+
+  <form id="loginForm" style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+    <button disabled style="
+      border: 2px solid #40a9ff; 
+      background: white; 
+      color: #40a9ff; 
+      padding: 8px 24px; 
+      border-radius: 8px; 
+      font-weight: bold;
+    ">Login</button>
+
+    <input type="text" id="loginUsername" placeholder="Usuário" required>
+    <input type="password" id="loginPassword" placeholder="Senha" required>
+
+    <button type="submit" style="
+      background: white;
+      color: #40a9ff;
+      border: 2px solid #40a9ff;
+      padding: 8px 24px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    ">Entrar</button>
+  </form>
+</div>
+
+
+  <div id="app" style="display:none;">
+    <header>
+       <img src="logo_conta_dupla.png" alt="Conta Dupla" style="height:100px;">
+  <button id="logout">Logout</button>
+    </header>
+    <div class="tabs">
+      <button id="tabDashboard" class="active">Dashboard</button>
+      <button id="tabCategorias">Categorias</button>
+      <button id="tabRelatorios">Relatórios</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardSection" class="section active">
+    <div class="marca-dagua">
+    <img src="logo_conta_dupla.png" alt="Marca D'Água - Conta Dupla">
+    </div>
+
+        <h3 style="margin-bottom: 10px; color: #007bff;">Lançamento: Receita / Despesa</h3>
+	<form id="entryForm">
+	  <label>Empresa:
+          <select id="companySelectEntry">
+            <option value="empresa1">Empresa PJ</option>
+            <option value="empresa2">Empresa PF</option>
+          </select>
+        </label>
+        <label>Categoria:
+          <select id="categorySelect"></select>
+        </label>
+        <label>Subcategoria:
+  	  <select id="subcategorySelect"></select>
+	</label>
+
+        <label>Data:
+          <input type="date" id="date" required>
+        </label>
+        <label>Valor:
+          <input type="number" id="amount" step="0.01" required>
+        </label>
+        <label>Tipo:
+          <select id="type"><option value="receita">Receita</option><option value="despesa">Despesa</option></select>
+        </label>
+        <label>Obs.:
+          <input type="text" id="observations" maxlength="30" placeholder="Até 30 chars">
+        </label>
+        <button type="submit">Adicionar</button>
+      </form>
+
+      <h3 style="margin-bottom: 10px; color: #007bff;">Filtro:</h3>
+
+      <div id="filterSection" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
+
+        <label>Empresa:
+          <select id="filterCompany">
+        	<option value="all">Todas</option>
+		<option value="empresa1">Empresa PJ</option>
+		<option value="empresa2">Empresa PF</option>
+	  </select>
+	</label>
+
+        <label>Tipo:
+	  <select id="filterType">
+	  	<option value="all">Todos</option>
+		<option value="receita">Receita</option>
+		<option value="despesa">Despesa</option>
+	  </select>
+	</label>
+
+        <label>Categoria:
+		<select id="filterCategory">
+			<option value="all">Todas</option>
+		</select>
+	</label>
+
+        <label>Subcategoria:
+		<select id="filterSubcategory">
+		   <option value="all">Todas</option>
+		</select>
+	</label>
+
+        <label>Data Inic.:
+		<input type="date" id="startDate">
+	</label>
+
+        <label>Data Fim.:
+		<input type="date" id="endDate">
+	</label>
+
+        <button type="button" id="filterChartBtn">Aplicar Filtro</button>
+
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="companySection" id="section1">
+          <h3 id="section1Title">Empresa PESSOA JURÍDICA</h3>
+          <table id="entriesTable1">
+            <thead><tr><th>Data</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Obs.</th><th>Saldo do Dia</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div id="totals1" class="totals"></div>
+          <canvas id="chart1"></canvas>
+        </div>
+
+        <div class="companySection" id="section2">
+          <h3 id="section2Title">Empresa PESSOA FÍSICA</h3>
+          <table id="entriesTable2">
+            <thead><tr><th>Data</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Obs.</th><th>Saldo do Dia</th><th>Ações</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div id="totals2" class="totals"></div>
+          <canvas id="chart2"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div id="categorySection" class="section">
+  <div class="marca-dagua">
+    <img src="logo_conta_dupla.png" alt="Marca D'Água - Conta Dupla">
+  </div>
+
+  <h3>Gerenciar Categorias e Subcategorias</h3>
+
+  <!-- Formulário de Cadastro de Categoria -->
+  <form style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+    <label>Categoria:
+      <input type="text" id="newCategory" placeholder="Nova categoria">
+    </label>
+    <label>Tipo:
+      <select id="newCategoryType">
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+    </label>
+    <button type="button" id="addCategory">Adicionar Categoria</button>
+  </form>
+
+  <!-- Formulário de Cadastro de Subcategoria -->
+  <h3>Adicionar Subcategoria</h3>
+  <form style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+    <label>Categoria:
+      <select id="parentCategory"></select>
+    </label>
+    <label>Subcategoria:
+      <input type="text" id="newSubcategory" placeholder="Nova subcategoria">
+    </label>
+    <button type="button" id="addSubcategory">Adicionar Subcategoria</button>
+  </form>
+
+  <!-- Lista de Categorias -->
+  <h3>Lista de Categorias</h3>
+  <table id="categoriesTable">
+   <thead>
+    <tr>
+      <th>Categoria</th>
+      <th>Tipo</th>
+      <th>Subcategorias</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+</div>
+
+
+    <!-- Relatórios -->
+    <div id="relatoriosSection" class="section">
+    <div class="marca-dagua">
+    <img src="logo_conta_dupla.png" alt="Marca D'Água - Conta Dupla">
+    </div>
+      <h3>Relatórios</h3>
+  <div id="filterReportSection" style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
+    <label>Empresa:
+      <select id="reportCompany">
+        <option value="all">Todas</option>
+        <option value="empresa1">Empresa PJ</option>
+        <option value="empresa2">Empresa PF</option>
+      </select>
+    </label>
+    <label>Tipo:
+      <select id="reportType">
+        <option value="all">Todos</option>
+        <option value="receita">Receita</option>
+        <option value="despesa">Despesa</option>
+      </select>
+    </label>
+    <label>Categoria:
+      <select id="reportCategory">
+        <option value="all">Todas</option>
+      </select>
+    </label>
+    <label>Subcategoria:
+      <select id="reportSubcategory">
+        <option value="all">Todas</option>
+      </select>
+     </label>
+
+    <label>Data Inic.:
+      <input type="date" id="reportStartDate">
+    </label>
+    <label>Data Fim.:
+      <input type="date" id="reportEndDate">
+    </label>
+    <button id="generateReportBtn">Gerar Relatório</button>
+    <button id="exportPdf">Exportar PDF</button>
+    <button id="exportExcel">Exportar Excel</button>
+  </div>
+  <table id="reportTable">
+    <thead>
+      <tr>
+    <th>Data</th>
+    <th>Empresa</th>
+    <th>Categoria</th>
+    <th>Tipo</th>
+    <th>Valor (R$)</th>
+    <th>Observações</th>
+  </tr>
+</thead>
+    <tbody></tbody>
+  </table>
+</div>
+</div>
+<script>
+    let currentUser=null;
+    let loginDiv, appDiv;
+
+  window.onload = function(){
+  loginDiv = document.getElementById('login');
+  appDiv = document.getElementById('app');
+
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const u = document.getElementById('loginUsername').value.trim().toUpperCase();
+    const p = document.getElementById('loginPassword').value;
+    if (u === 'ADMIN' && p === '@311098') currentUser = 'ADMIN';
+    else if (u === 'LOJA' && p === '123456') currentUser = 'LOJA';
+    else { alert('Credenciais inválidas.'); return; }
+    loginDiv.style.display = 'none';
+    appDiv.style.display = 'block';
+    initApp();
+  });
+
+  document.getElementById('logout').addEventListener('click', () => {
+    appDiv.style.display = 'none';
+    loginDiv.style.display = 'block';
+  });
+};
+
+   // ✅ Carregar categorias
+function loadCategories() {
+    return JSON.parse(localStorage.getItem('categories') || '[]');
+}
+
+// ✅ Salvar categorias
+function saveCategories(cats) {
+    localStorage.setItem('categories', JSON.stringify(cats));
+}
+
+// ✅ Atualizar lista de categorias e subcategorias
+function refreshCategories() {
+    const cats = loadCategories();
+    const sel = document.getElementById('categorySelect');
+    const fsel = document.getElementById('filterCategory');
+    const parentSel = document.getElementById('parentCategory');
+    const subFilter = document.getElementById('filterSubcategory');
+    const tbody = document.getElementById('categoriesTable').querySelector('tbody');
+
+    tbody.innerHTML = '';
+    sel.innerHTML = '';
+    fsel.innerHTML = '<option value="all">Todas</option>';
+    parentSel.innerHTML = '';
+    subFilter.innerHTML = '<option value="all">Todas</option>';
+
+    cats.forEach((c, index) => {
+        const opt = new Option(c.name, c.name);
+        sel.add(opt);
+        fsel.add(new Option(c.name, c.name));
+        parentSel.add(new Option(c.name, c.name));
+
+        const subList = c.subcategories ? c.subcategories.join(", ") : "Sem Subcategorias";
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${c.name}</td>
+            <td>${c.type}</td>
+            <td>${subList}</td>
+            <td></td>
+        `;
+
+        const tdAcoes = tr.querySelector('td:last-child');
+
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️';
+        btnEdit.onclick = () => {
+            const novoNome = prompt('Novo nome da categoria:', c.name);
+            if (!novoNome) return;
+            const novoTipo = prompt('Novo tipo (receita/despesa):', c.type);
+            if (!['receita', 'despesa'].includes(novoTipo)) return;
+
+            cats[index].name = novoNome.trim();
+            cats[index].type = novoTipo.trim();
+            saveCategories(cats);
+            refreshCategories();
+        };
+
+        const btnDel = document.createElement('button');
+        btnDel.textContent = '🗑️';
+        btnDel.onclick = () => {
+            if (confirm(`Deseja excluir a categoria "${c.name}"?`)) {
+                cats.splice(index, 1);
+                saveCategories(cats);
+                refreshCategories();
+            }
+        };
+
+        tdAcoes.append(btnEdit, btnDel);
+        tbody.appendChild(tr);
+
+    	if (c.subcategories) {
+       	 c.subcategories.forEach(sub => {
+            const opt = new Option(sub, sub);
+            subFilter.add(opt);
+           });
+    	}
+}); // 🔥 ESSE PARÊNTESES ESTAVA FALTANDO (FIM DO FOR EACH)
+
+// 🔥 Fim correto da função refreshCategories()
+}
+
+    // ✅ Adicionar Categoria
+document.getElementById('addCategory').addEventListener('click', (e) => {
+    const name = document.getElementById('newCategory').value.trim();
+    const type = document.getElementById('newCategoryType').value;
+    if (!name) return;
+    const cats = loadCategories();
+    if (!cats.some(c => c.name === name)) {
+        cats.push({ name, type, subcategories: [] });
+        saveCategories(cats);
+    }
+    
+    refreshCategories();
+   
+    document.getElementById('newCategory').value = '';
+});
+
+// ✅ Adicionar Subcategoria
+document.getElementById('addSubcategory').addEventListener('click', () => {
+    const parent = document.getElementById('parentCategory').value; // 🔥 Armazena a categoria atual
+    const sub = document.getElementById('newSubcategory').value.trim();
+    if (!sub) return;
+    const cats = loadCategories();
+    const cat = cats.find(c => c.name === parent);
+    if (cat) {
+        cat.subcategories = cat.subcategories || [];
+        if (!cat.subcategories.includes(sub)) {
+            cat.subcategories.push(sub);
+            saveCategories(cats);
+            refreshCategories();
+        }
+    }
+    document.getElementById('newSubcategory').value = '';
+
+    // 🔥 Mantém a última categoria selecionada no campo Categoria
+    document.getElementById('parentCategory').value = parent;
+});
+
+
+    function loadEntries(){ return JSON.parse(localStorage.getItem('entries')||'[]'); }
+    function saveEntries(entries){ localStorage.setItem('entries',JSON.stringify(entries)); }
+    let chart1, chart2;
+
+    function deleteEntry(id) {
+    const all = loadEntries();
+    const index = all.findIndex(e => e.id === id);
+    if (index !== -1) {
+        all.splice(index, 1);
+        saveEntries(all);
+        applyFilter();
+    }
+}
+
+   function applyFilter(){
+      const fc=document.getElementById('filterCompany').value;
+      const ft=document.getElementById('filterType').value;
+      const fcat=document.getElementById('filterCategory').value;
+      const fsub = document.getElementById('filterSubcategory').value; // 🔥 Adicionado
+      const start=document.getElementById('startDate').value;
+      const end=document.getElementById('endDate').value;
+      ['empresa1','empresa2'].forEach((c,idx)=>{
+        const sec=document.getElementById(c==='empresa1'?'section1':'section2');
+        if(fc==='all'||fc===c){ 
+            sec.style.display='block'; 
+            updateTable(c,ft,fcat,fsub,start,end,idx+1); 
+        } else {
+        sec.style.display='none';
+        }
+    });
+   }
+
+    function updateTable(company,ft,fcat, fsub, start,end,index){
+      let entries=loadEntries().filter(e=>e.company===company);
+      if(ft!=='all') entries=entries.filter(e=>e.type===ft);
+      if(fcat!=='all') entries=entries.filter(e=>e.category===fcat);
+      if (fsub !== 'all') entries = entries.filter(e => e.subcategory === fsub);
+      if(start) entries=entries.filter(e=>e.date>=start);
+      if(end) entries=entries.filter(e=>e.date<=end);
+      entries.sort((a,b)=>a.date.localeCompare(b.date));
+      const tbody=document.getElementById(`entriesTable${index}`).querySelector('tbody');tbody.innerHTML='';
+      entries.forEach((e,i)=>{
+        const prevBalance = i>0 ? parseFloat(tbody.rows[i-1].cells[5].textContent.replace(',','.')) : 0;
+        const balance=(prevBalance + e.amount * (e.type==='receita'?1:-1)).toFixed(2);
+        const tr=document.createElement('tr');
+        if (e.color) tr.style.backgroundColor = e.color;
+        tr.innerHTML=`<td>${e.date.split('-').reverse().join('/')}</td><td>${e.category}</td><td>${e.amount.toFixed(2)}</td><td>${e.type === 'receita' ? 'Receita' : 'Despesa'}</td><td>${e.observations||''}</td><td>${balance}</td>`;
+        const tdA=document.createElement('td');
+        const btnD=document.createElement('button');
+        btnD.textContent='🗑️';
+        btnD.onclick = () => deleteEntry(e.id);
+        tdA.append(btnD);tr.appendChild(tdA);tbody.appendChild(tr);
+        
+// Botão Vermelho
+const btnV = document.createElement('button'); 
+btnV.textContent = '🔴'; 
+btnV.onclick = () => {
+  const all = loadEntries();
+  const idx = all.findIndex(ent => ent.id === e.id);
+  if (idx !== -1) {
+    all[idx].color = 'lightcoral';
+    saveEntries(all);
+    applyFilter(); // 🔥 Atualiza a tabela SEM resetar o gráfico
+  }
+};
+
+// Botão Azul
+const btnA = document.createElement('button'); 
+btnA.textContent = '🔵'; 
+btnA.onclick = () => {
+ const all = loadEntries();
+  const idx = all.findIndex(ent => ent.id === e.id);
+  if (idx !== -1) {
+    all[idx].color = 'cyan';
+    saveEntries(all);
+    applyFilter(); // 🔥 Atualiza a tabela SEM resetar o gráfico
+  }
+};
+
+// Botão Branco
+const btnB = document.createElement('button'); 
+btnB.textContent = '⚪'; 
+btnB.onclick = () => {
+ const all = loadEntries();
+  const idx = all.findIndex(ent => ent.id === e.id);
+  if (idx !== -1) {
+    all[idx].color = 'white';
+    saveEntries(all);
+    applyFilter(); // 🔥 Atualiza a tabela SEM resetar o gráfico
+  }
+};
+
+tdA.append(btnD, btnV, btnA, btnB);
+
+      });
+      const totalR=entries.filter(e=>e.type==='receita').reduce((s,e)=>s+e.amount,0);
+      const totalD=entries.filter(e=>e.type==='despesa').reduce((s,e)=>s+e.amount,0);
+      document.getElementById(`totals${index}`).textContent=`Total: Receita: 
+ R$${totalR.toFixed(2)} | Despesa: R$${totalD.toFixed(2)}`;
+      const cmap={};entries.forEach(e=>{const v=e.type==='receita'?e.amount:-e.amount;cmap[e.category]=(cmap[e.category]||0)+v;});
+      const ctEl=document.getElementById(index===1?'categoryTotals1':'categoryTotals2');if(ctEl) ctEl.textContent='Por Categoria: '+Object.entries(cmap).map(([k,v])=>`${k}: R$${v.toFixed(2)}`).join(' | ');
+      const ch = index === 1 ? chart1 : chart2;
+
+if (ch.config.type === 'pie') {
+    ch.data.datasets[0].data = [totalR, totalD];
+    ch.update();
+}
+    }
+
+    document.getElementById('filterChartBtn').addEventListener('click',applyFilter);
+
+    // 🔥 Atualizar Subcategoria do Filtro da Dashboard com base na Categoria
+document.getElementById('filterCategory').addEventListener('change', () => {
+    const selected = document.getElementById('filterCategory').value;
+    const cats = loadCategories();
+    const found = cats.find(c => c.name === selected);
+
+    const subSel = document.getElementById('filterSubcategory');
+    subSel.innerHTML = '<option value="all">Todas</option>';
+
+    if (found && found.subcategories) {
+        found.subcategories.forEach(sub => {
+            const opt = new Option(sub, sub);
+            subSel.add(opt);
+        });
+    }
+});
+
+
+    // Relatórios
+       document.getElementById('generateReportBtn').addEventListener('click', () => {
+  const company = document.getElementById('reportCompany').value;
+  const type = document.getElementById('reportType').value;
+  const category = document.getElementById('reportCategory').value;
+  const start = document.getElementById('reportStartDate').value;
+  const end = document.getElementById('reportEndDate').value;
+  const subcategory = document.getElementById('reportSubcategory').value;
+  const tbody = document.getElementById('reportTable').querySelector('tbody');
+  tbody.innerHTML = '';
+  let entries = JSON.parse(localStorage.getItem('entries') || '[]');
+  if (company !== 'all') entries = entries.filter(e => e.company === company);
+  if (type !== 'all') entries = entries.filter(e => e.type === type);
+  if (category !== 'all') entries = entries.filter(e => e.category === category);
+  if (subcategory !== 'all') entries = entries.filter(e => e.subcategory === subcategory);
+  if (start) entries = entries.filter(e => e.date >= start);
+  if (end) entries = entries.filter(e => e.date <= end);
+  entries.sort((a, b) => a.date.localeCompare(b.date));
+  entries.forEach(e => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${e.date.split('-').reverse().join('/')}</td>
+                    <td>${e.company === 'empresa1' ? 'Empresa PJ' : 'Empresa PF'}</td>
+                    <td>${e.category}</td>
+                    <td>${e.type === 'receita' ? 'Receita' : 'Despesa'}</td>
+                    <td>R$ ${e.amount.toFixed(2)}</td>
+                    <td>${e.observations || ''}</td>`;
+    tbody.appendChild(tr);
+  });
+  const totalReceita = entries.filter(e => e.type === 'receita').reduce((sum, e) => sum + e.amount, 0);
+  const totalDespesa = entries.filter(e => e.type === 'despesa').reduce((sum, e) => sum + e.amount, 0);
+  const saldo = totalReceita - totalDespesa;
+
+  const trTotal = document.createElement('tr');
+  trTotal.innerHTML = `
+  	<td colspan="3" style="font-weight:bold; background:#e6f7ff;">TOTAL</td>
+  	<td style="font-weight:bold; background:#e6f7ff;">Receitas: R$ ${totalReceita.toFixed(2)}</td>
+  	<td style="font-weight:bold; background:#fde2e2;">Despesas: R$ ${totalDespesa.toFixed(2)}</td>
+  <td style="font-weight:bold; background:#d2f8d2;">Saldo: R$ ${saldo.toFixed(2)}</td>
+`;
+tbody.appendChild(trTotal);
+
+});
+
+
+    document.getElementById('exportExcel').addEventListener('click', () => {
+  	const table = document.getElementById('reportTable');
+  	const wb = XLSX.utils.book_new();
+
+  	// Linha simulando logo/nome da empresa no topo
+ 	 const ws_data = [['Relatório Financeiro - Conta Dupla']];
+ 	 const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+  	const wsTable = XLSX.utils.table_to_sheet(table, { origin: -1 });
+  	Object.assign(ws, wsTable);
+
+ 	 XLSX.utils.book_append_sheet(wb, ws, 'Relatorio');
+  	XLSX.writeFile(wb, 'relatorio.xlsx');
+	});
+
+document.getElementById('exportPdf').addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(14);
+    doc.text('Relatório Financeiro - Conta Dupla', 14, 15);
+
+    const headers = [['Data', 'Empresa', 'Categoria', 'Tipo', 'Valor (R$)', 'Observações']];
+    const data = Array.from(document.getElementById('reportTable').querySelectorAll('tbody tr'))
+        .map(tr => Array.from(tr.cells).map(td => td.textContent));
+
+    doc.autoTable({
+        head: headers,
+        body: data,
+        startY: 25,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [64, 169, 255] }
+    });
+
+    doc.save('relatorio.pdf');
+});
+
+
+    function initApp(){
+      document.querySelectorAll('.tabs button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // remover destaque anterior
+    document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+
+    // ativar destaque da aba clicada
+    btn.classList.add('active');
+    if (btn.id === 'tabDashboard') {
+      document.getElementById('dashboardSection').classList.add('active');
+    } else if (btn.id === 'tabCategorias') {
+      document.getElementById('categorySection').classList.add('active');
+    } else if (btn.id === 'tabRelatorios') {
+      document.getElementById('relatoriosSection').classList.add('active');
+    }
+  });
+});
+
+      refreshCategories();
+      
+      if (currentUser === 'ADMIN') {
+
+  document.querySelector('.tabs').style.display = 'flex';
+  document.getElementById('filterSection').style.display = 'flex';
+  document.querySelector('.dashboard-grid').style.display = 'grid';
+}
+      if(currentUser==='LOJA'){document.querySelector('.tabs').style.display='none';document.getElementById('filterSection').style.display='none';document.querySelector('.dashboard-grid').style.display='none';document.getElementById('companySelectEntry').value='empresa1';document.getElementById('companySelectEntry').disabled=true;document.getElementById('categorySelect').innerHTML='<option value="PIX">PIX</option>';document.getElementById('categorySelect').disabled=true;
+}
+
+document.getElementById('entryForm').addEventListener('submit',e=>{e.preventDefault();
+      
+const currentCompany = document.getElementById('companySelectEntry').value;
+const lastCategory = document.getElementById('categorySelect').value;
+const lastType = document.getElementById('type').value;
+   
+const entry = { 
+    id: crypto.randomUUID(), // 🔥 ID único robusto
+    company: currentCompany,
+    category: lastCategory,
+    subcategory: document.getElementById('subcategorySelect').value,
+    date: document.getElementById('date').value,
+    amount: parseFloat(document.getElementById('amount').value),
+    type: lastType,
+    observations: document.getElementById('observations').value
+};
+
+const arr=loadEntries();
+arr.push(entry); 
+saveEntries(arr); 
+applyFilter();
+
+// Limpa os campos, mas mantém a empresa selecionada e a data
+
+const lastDate = document.getElementById('date').value;
+e.target.reset();
+document.getElementById('companySelectEntry').value = currentCompany;
+document.getElementById('date').value = lastDate;
+document.getElementById('categorySelect').value = lastCategory; // 🔥 Mantém a categoria
+document.getElementById('type').value = lastType;
+
+});
+  
+ chart1=new Chart(document.getElementById('chart1').getContext('2d'),{type:'pie',data:{labels:['Receitas','Despesas'],datasets:[{data:[0,0]}]},options:{responsive:true}});
+ chart2=new Chart(document.getElementById('chart2').getContext('2d'),{type:'pie',data:{labels:['Receitas','Despesas'],datasets:[{data:[0,0]}]},options:{responsive:true}});
+ function toggleChart(chart, company, index) {
+    const currentType = chart.config.type;
+
+    if (currentType === 'pie' && chart.data.labels.length === 2) {
+        // 🔥 Mudar para gráfico de Categorias/Subcategorias
+        const entries = loadEntries().filter(e => e.company === company);
+
+        const group = {};
+        entries.forEach(e => {
+            const key = e.subcategory && e.subcategory !== 'all' && e.subcategory !== '' 
+                ? `${e.category} - ${e.subcategory}`
+                : e.category;
+            group[key] = (group[key] || 0) + (e.type === 'receita' ? e.amount : -e.amount);
+        });
+
+        const labels = Object.keys(group);
+        const data = Object.values(group);
+
+        chart.config.type = 'doughnut';
+        chart.data = {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: labels.map(() => `hsl(${Math.random() * 360},70%,70%)`)
+            }]
+        };
+        chart.update();
+     } else {
+
+          // 🔥 Voltar para Receita vs Despesa
+        const totalR = loadEntries().filter(e => e.company === company && e.type === 'receita')
+                          .reduce((sum, e) => sum + e.amount, 0);
+        const totalD = loadEntries().filter(e => e.company === company && e.type === 'despesa')
+                          .reduce((sum, e) => sum + e.amount, 0);
+
+        chart.config.type = 'pie';
+        chart.data = {
+            labels: ['Receitas', 'Despesas'],
+            datasets: [{
+                data: [totalR, totalD],
+                backgroundColor: ['#40a9ff', '#ff4d4f']
+            }]
+        };
+        chart.update();
+    }
+}
+ 
+document.getElementById('chart1').onclick = () => toggleChart(chart1, 'empresa1', 1);
+document.getElementById('chart2').onclick = () => toggleChart(chart2, 'empresa2', 2);
+
+ const reportCategory = document.getElementById('reportCategory');
+  const reportCats = loadCategories();
+  reportCategory.innerHTML = '<option value="all">Todas</option>';
+  reportCats.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.name;
+    opt.textContent = cat.name;
+    reportCategory.appendChild(opt);
+  });
+
+  const reportSubcategory = document.getElementById('reportSubcategory');
+  reportSubcategory.innerHTML = '<option value="all">Todas</option>';
+  reportCats.forEach(cat => {
+    if (cat.subcategories) {
+        cat.subcategories.forEach(sub => {
+            const opt = document.createElement('option');
+            opt.value = sub;
+            opt.textContent = sub;
+            reportSubcategory.appendChild(opt);
+        });
+    }
+});
+
+   // 🔥 Atualizar Subcategoria no Relatório com base na Categoria
+document.getElementById('reportCategory').addEventListener('change', () => {
+    const selected = document.getElementById('reportCategory').value;
+    const cats = loadCategories();
+    const found = cats.find(c => c.name === selected);
+
+    const subSel = document.getElementById('reportSubcategory');
+    subSel.innerHTML = '<option value="all">Todas</option>';
+
+    if (found && found.subcategories) {
+        found.subcategories.forEach(sub => {
+            const opt = new Option(sub, sub);
+            subSel.add(opt);
+        });
+    }
+});
+
+   
+
+  // Atualizar tipo automaticamente com base na categoria selecionada
+  document.getElementById('categorySelect').addEventListener('change', () => {
+    const selected = document.getElementById('categorySelect').value;
+    const cats = loadCategories();
+    const found = cats.find(c => c.name === selected);
+
+    const subSel = document.getElementById('subcategorySelect');
+    subSel.innerHTML = '';
+
+    if (found && found.subcategories) {
+        found.subcategories.forEach(sub => {
+            const opt = new Option(sub, sub);
+            subSel.add(opt);
+        });
+    }
+
+    if (found) {
+        document.getElementById('type').value = found.type;
+    }
+});
+
+
+  // Bloquear edição manual do campo Tipo
+  document.getElementById('type').disabled = true;
+  document.getElementById('categorySelect').addEventListener('change', () => {
+    const selected = document.getElementById('categorySelect').value;
+    const cats = loadCategories();
+    const found = cats.find(c => c.name === selected);
+    if (found) {
+      document.getElementById('type').value = found.type;
+    }
+  });
+      applyFilter();
+      }    
+</script>
+
+</body>
+</html>
+<style>
+button {
+  transition: all 0.3s ease;
+}
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+#loginForm button,
+form button,
+.tabs button.active {
+  border-radius: 8px;
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  .tabs {
+    flex-direction: column;
+  }
+  form label {
+    flex: 1 1 100%;
+  }
+}
+#login {
+  background: linear-gradient(to right, #007bff, #00c6ff);
+  color: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 380px;
+  margin: auto;
+  margin-top: 10vh;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.section, .tabs button, .companySection, form, header {
+  animation: fadeIn 0.4s ease-in-out;
+}
+.tabs button.active {
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #e0f7ff, #ffffff);
+  color: #0077cc;
+}
+.tabs button:not(.active):hover {
+  background-color: #f0f8ff;
+}
+header {
+  border-bottom: 2px solid #ddeeff;
+  padding-bottom: 10px;
+}
+.tabs button {
+  border-radius: 10px 10px 0 0;
+  font-weight: 600;
+}
+
+/* Lista de Categorias */
+#categoriesList li {
+  background: #f9fbfd;
+  margin-bottom: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#categoriesList li button {
+  margin-left: 5px;
+}
+</style>
